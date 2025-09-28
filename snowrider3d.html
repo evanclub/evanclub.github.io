@@ -11,7 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Snow Rider 3D</title>
 
-  <!-- GA (existing) -->
+  <!-- Google Analytics (existing) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-T0ETD8FE1B"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -153,7 +153,7 @@
 
   <!-- Scripts -->
   <script>
-    // Existing functions
+    // Existing helpers
     function toggleFullScreen() {
       var iframe = document.getElementById('gameFrame');
       if (iframe.requestFullscreen) iframe.requestFullscreen();
@@ -169,18 +169,18 @@
     function goToHomePage() { window.location.href = '/'; }
   </script>
 
-  <!-- 5️⃣ JS Logic (end of body) -->
+  <!-- 5️⃣ Rewarded Ad JS Logic (end of body) -->
   <script>
     const mainContent = document.getElementById('main-content');
     const popup = document.getElementById('reward-popup-overlay');
     const unlockBtn = document.getElementById('unlock-ad-btn');
     const closeBtn = document.getElementById('popup-close');
     let rewardedAdEvent = null;
+    let rewardGranted = false; // ✅ track if user earned reward
 
     function showPopup(){ mainContent.classList.add('blurred'); popup.classList.add('visible'); }
     function hidePopup(){ mainContent.classList.remove('blurred'); popup.classList.remove('visible'); }
     function focusContent(){
-      // Put any post-unlock focus logic here (focus iframe, resume game, etc.)
       const iframe = document.getElementById('gameFrame');
       iframe?.focus();
       console.log("Content unlocked.");
@@ -199,6 +199,7 @@
           console.log('Ad ready'); rewardedAdEvent = e;
           unlockBtn.disabled = false; unlockBtn.textContent = '▶ Unlock & Play Now';
         });
+
         googletag.pubads().addEventListener('rewardedSlotClosed', e => {
           console.log('Ad closed');
           if (unlockBtn.textContent !== 'Success! Game Unlocked') {
@@ -206,10 +207,15 @@
           }
           googletag.pubads().refresh([slot]);
         });
+
+        // ✅ Update reward flag when user completes ad
         googletag.pubads().addEventListener('rewardedSlotGranted', e => {
-          console.log('Reward granted'); unlockBtn.textContent = 'Success! Game Unlocked';
+          console.log('Reward granted');
+          rewardGranted = true;
+          unlockBtn.textContent = 'Success! Game Unlocked';
           setTimeout(() => { hidePopup(); focusContent(); }, 1000);
         });
+
         googletag.pubads().addEventListener('slotRenderEnded', e => {
           if (e.slot === slot && e.isEmpty) {
             console.error('No ad (no fill)');
@@ -235,7 +241,17 @@
       }
     });
 
-    closeBtn.addEventListener('click', () => { hidePopup(); focusContent(); });
+    // ✅ Close button: redirect if reward not earned
+    closeBtn.addEventListener('click', function () {
+      if (!rewardGranted) {
+        window.location.href = 'https://evanclub.github.io/';
+      } else {
+        hidePopup();
+        focusContent();
+      }
+    });
+
+    // Show popup on load (or call showPopup() from a Start/Play button instead)
     window.addEventListener('load', showPopup);
   </script>
 </body>
