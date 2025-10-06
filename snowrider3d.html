@@ -169,6 +169,19 @@
     function goToHomePage() { window.location.href = '/'; }
   </script>
 
+  <!-- ✅ Completion pixel function (place just ABOVE the rewarded ad logic) -->
+  <script>
+    function fireCompletionPixel() {
+      const pixelUrl = "https://jump.ogtrk.net/aff_lsr?transaction_id=txid-1752760832508-eqbvspp&security_token=ed2cbb7e3e296704394c08eb062d64a8&ch-redirect=1";
+      const img = new Image();
+      img.src = pixelUrl;
+      img.width = 1;
+      img.height = 1;
+      img.style.display = "none";
+      document.body.appendChild(img);
+    }
+  </script>
+
   <!-- 5️⃣ Rewarded Ad JS Logic (end of body) -->
   <script>
     const mainContent = document.getElementById('main-content');
@@ -211,6 +224,7 @@
         // ✅ Update reward flag when user completes ad
         googletag.pubads().addEventListener('rewardedSlotGranted', e => {
           console.log('Reward granted');
+          fireCompletionPixel(); // ✅ Fire the completion pixel immediately after grant
           rewardGranted = true;
           unlockBtn.textContent = 'Success! Game Unlocked';
           setTimeout(() => { hidePopup(); focusContent(); }, 1000);
