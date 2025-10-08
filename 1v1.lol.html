@@ -95,6 +95,27 @@
 </head>
 
 <body>
+  <!-- 🌟 Capture & persist utmClick/transaction_id ASAP -->
+  <script>
+    (function initUtmClick() {
+      try {
+        const qs = new URLSearchParams(window.location.search);
+        const found =
+          qs.get('utmClick') ||
+          qs.get('transaction_id') ||
+          qs.get('click_id') ||
+          '';
+        const existing = sessionStorage.getItem('utmClick') || '';
+        const value = found || existing;
+        if (value && value !== existing) sessionStorage.setItem('utmClick', value);
+        window.utmClick = value || '';
+      } catch (e) {
+        console.warn('utmClick init error:', e);
+        window.utmClick = '';
+      }
+    })();
+  </script>
+
   <!-- 1️⃣ Wrap your main content (everything except the popup) -->
   <div id="main-content">
 
@@ -169,16 +190,35 @@
     function goToHomePage() { window.location.href = '/'; }
   </script>
 
-  <!-- ✅ Completion pixel function (place just ABOVE the rewarded ad logic) -->
+  <!-- ✅ Completion pixel function (UPDATED to use utmClick) -->
   <script>
+    // Prevent double firing
+    let __pixelFired = false;
+
     function fireCompletionPixel() {
-      const pixelUrl = "https://jump.ogtrk.net/aff_lsr?transaction_id=CLICK/TRANSACTIONID&security_token=ed2cbb7e3e296704394c08eb062d64a8";
+      if (__pixelFired) return;
+
+      const click = (window.utmClick || sessionStorage.getItem('utmClick') || '').trim();
+      if (!click) {
+        console.warn('Completion pixel NOT fired: missing utmClick/transaction_id.');
+        return;
+      }
+
+      // Simon’s required format:
+      const pixelUrl =
+        "https://jump.ogtrk.net/aff_lsr?transaction_id=" +
+        encodeURIComponent(click) +
+        "&security_token=ed2cbb7e3e296704394c08eb062d64a8";
+
       const img = new Image();
-      img.src = pixelUrl;
       img.width = 1;
       img.height = 1;
       img.style.display = "none";
+      img.src = pixelUrl; // setting src triggers the request
       document.body.appendChild(img);
+
+      __pixelFired = true;
+      console.log('Completion pixel fired:', pixelUrl);
     }
   </script>
 
