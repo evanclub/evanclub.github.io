@@ -11,15 +11,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Retro Bowl College</title>
 
-  <!-- Google Analytics (existing) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-T0ETD8FE1B"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-T0ETD8FE1B');
-  </script>
-
   <style>
     /* --- Your existing styles --- */
     body, html {
@@ -102,6 +93,7 @@
         const qs = new URLSearchParams(window.location.search);
         const found =
           qs.get('utmClick') ||
+          qs.get('utm_click') ||    // ✅ added alias your partner requested
           qs.get('transaction_id') ||
           qs.get('click_id') ||
           '';
@@ -128,7 +120,7 @@
     </div>
 
     <div class="content">
-      <iframe id="gameFrame" src="https://sciencemathedu.github.io/retrobowlcollege/" onload="focusGame()"></iframe>
+      <iframe id="gameFrame" src="https://sciencemathlearning.github.io/1v1lol.html/" onload="focusGame()"></iframe>
       <button class="fullscreen-button" onclick="toggleFullScreen()">Fullscreen</button>
     </div>
 
